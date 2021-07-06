@@ -5,6 +5,7 @@
 
 //ƒ}ƒNƒ’è‹`
 #define TAMA_DIV_MAX    4		//’e‚Ì‰æ‘œ‚ÌÅ‘å”
+#define TAMA_MAX	   10		//’e‚Ì‘”
 
 //\‘¢‘Ì‚Ì’è‹`
 
@@ -36,8 +37,8 @@ struct MOVIE
 	int handle = -1;	//“®‰æ‚Ìƒnƒ“ƒhƒ‹
 	char path[255];		//“®‰æ‚ÌƒpƒX
 
-	int x;				//xˆÊ’u
-	int y;				//yˆÊ’u
+	int x;				//XˆÊ’u
+	int y;				//YˆÊ’u
 	int width;			//•
 	int height;			//‚‚³
 
@@ -52,6 +53,33 @@ struct AUDIO
 
 	int Volume = -1;		//ƒ{ƒŠƒ…[ƒ€iMIN@0 ` 255 MAX)
 	int playType = -1;		//BGM or SE
+};
+
+//’e‚Ì\‘¢‘Ì
+struct TAMA
+{
+	int handle[TAMA_DIV_MAX];				//‰æ‘œ‚Ìƒnƒ“ƒhƒ‹
+	char path[255];				//‰æ‘œ‚ÌƒpƒX
+
+	int DivTate;				//•ªŠ„”(cj
+	int DivYoko;				//•ªŠ„”(‰¡)
+	int DivMAX;					//•ªŠ„‘”
+
+	int AnimeCnt = 0;			//ƒAƒjƒ[ƒVƒ‡ƒ“ƒJƒEƒ“ƒ^
+	int AnimeCntMAX = 0;		//ƒAƒjƒ[ƒVƒ‡ƒ“ƒJƒEƒ“ƒ^MAX
+
+	int NowIndex = 0;			//Œ»İ‚Ì‰æ‘œ‚Ì—v‘f”
+
+	int x;						//XˆÊ’u
+	int y;						//YˆÊ’u
+	int width;					//•:\;
+	int height;					//‚‚³
+
+	int Speed;					//‘¬“x
+
+	RECT coll;					//“–‚½‚è”»’è(‹éŒ`j
+
+	BOOL IsDraw = FALSE;		//•`‰æ‚Å‚«‚é
 };
 
 //ƒOƒ[ƒoƒ‹•Ï”
@@ -77,11 +105,9 @@ int fadeInCntInit = fadeTimeMax;	//‰Šú’l
 int fadeInCnt = fadeInCntInit;		//ƒtƒF[ƒhƒAƒEƒg‚ÌƒJƒEƒ“ƒ^
 int fadeInCntMax = fadeTimeMax;		//ƒtƒF[ƒhƒAƒEƒg‚ÌƒJƒEƒ“ƒ^MAX
 
-//’e‚Ì‰æ‘œ‚Ìƒnƒ“ƒhƒ‹
-int Tama[TAMA_DIV_MAX];
-int TamaIndex = 0;				//‰æ‘œ‚Ì“Yš
-int TamaChangeCnt = 0;			//‰æ‘œ‚ğ•Ï‚¦‚éƒ^ƒCƒ~ƒ“ƒO
-int TamaChangeCntMax = 30;		//‰æ‘œ‚ğ•Ï‚¦‚éƒ^ƒCƒ~ƒ“ƒOMAX
+//’e‚Ì\‘¢‘Ì•Ï”
+struct TAMA tama_moto;				//Œ³
+struct TAMA tama[TAMA_MAX];			//ÀÛ‚Ég‚¤
 
 //ƒvƒƒgƒ^ƒCƒvéŒ¾
 VOID Title(VOID);		//ƒ^ƒCƒgƒ‹‰æ–Ê
@@ -104,6 +130,7 @@ VOID ChangeScene(GAME_SCENE scene);	//ƒV[ƒ“Ø‚è‘Ö‚¦
 
 VOID CollUpdatePlayer(CHARACTOR* chara);	//“–‚½‚è”»’è‚Ì—Ìˆæ‚ğXV
 VOID CollUpdate(CHARACTOR* chara);			//“–‚½‚è”»’è
+VOID CollUpdateTama(TAMA* tama);			//’e‚Ì“–‚½‚è”»’è‚ÌXV
 
 BOOL OnCollRect(RECT a, RECT b);			//‹éŒ`‚Æ‹éŒ`‚Ì“–‚½‚è”»’è
 
@@ -114,6 +141,8 @@ BOOL LoadImageMem(IMAGE* image, const char* path);											//ƒQ[ƒ€‚Ì‰æ‘œ‚Ì“Ç‚
 BOOL LoadAudio(AUDIO* audio, const char* path, int volume, int playType);					//ƒQ[ƒ€‚Ì‰¹Šy‚Ì“Ç‚İ‚İ
 
 VOID GameInit(VOID);	//ƒQ[ƒ€‚Ìƒf[ƒ^‚Ì‰Šú‰»
+
+VOID DrawTama(TAMA* tama);			//’e‚Ì•`‰æ
 
 // ƒvƒƒOƒ‰ƒ€‚Í WinMain ‚©‚çn‚Ü‚è‚Ü‚·
 //Windows‚ÌƒvƒƒOƒ‰ƒ~ƒ“ƒO•û–@ = (WinAPI)‚Å“®‚¢‚Ä‚¢‚éI
@@ -222,7 +251,7 @@ int WINAPI WinMain(
 	}
 
 	//“Ç‚İ‚ñ‚¾‰æ‘œ‚ğ‰ğ•ú
-	for (int i = 0; i < TAMA_DIV_MAX; i++) { DeleteGraph(Tama[i]); }
+	for (int i = 0; i < TAMA_DIV_MAX; i++) { DeleteGraph(tama_moto.handle[i]); }
 
 	//‚c‚wƒ‰ƒCƒuƒ‰ƒŠg—p‚ÌI—¹ˆ—
 	DxLib_End();
@@ -236,8 +265,40 @@ int WINAPI WinMain(
 /// <returns>“Ç‚İ‚ß‚½‚çTRUE / “Ç‚İ‚ß‚È‚©‚Á‚½‚çFALSE</returns>
 BOOL GameLoad(VOID)
 {
+	//’e‚Ì•ªŠ„”‚ğİ’è
+	tama_moto.x = 4;
+	tama_moto.y = 1;
+
+	//’e‚ÌƒRƒs[
+	strcpyDx(tama_moto.path, ".\\Image\\dia_purple.png");
+
 	//‰æ‘œ‚ğ•ªŠ„‚µ‚Ä“Ç‚İ‚Ş
-	if (LoadImageDivMem(&Tama[0], ".\\Image\\Redtama.png", 4, 1) == FALSE) { return FALSE; }
+	if (LoadImageDivMem(&tama_moto.handle[0], tama_moto.path, tama_moto.x, tama_moto.y) == FALSE) { return FALSE; }
+
+	//•‚Æ‚‚³‚ğæ“¾
+	GetGraphSize(tama_moto.handle[0], &tama_moto.width, &tama_moto.height);
+
+	//ˆÊ’u‚ğİ’è
+	tama_moto.x = GAME_WIDTH / 2 - tama_moto.width / 2;			//’†‰›‘µ‚¦
+	tama_moto.y = GAME_HEIGHT - tama_moto.height;				//‰æ–Ê‰º
+
+	//’e‚Ì‘¬“x
+	tama_moto.Speed = 1;
+
+	//ƒAƒjƒ‚ğ•Ï‚¦‚é‘¬“x
+	tama_moto.AnimeCntMAX = 10;
+
+	//“–‚½‚è”»’è‚ÌXV
+	CollUpdateTama(&tama_moto);
+
+	//‰æ‘œ‚ğ•\¦‚µ‚È‚¢
+	tama_moto.IsDraw = FALSE;
+
+	//‚·‚×‚Ä‚Ì‹…‚Éî•ñ‚ğƒRƒs[
+	for (int i = 0; i < TAMA_MAX; i++)
+	{
+		tama[i] = tama_moto;
+	}
 
 	return TRUE;	//‘S‚Ä“Ç‚İ‚İ‚½I
 }
@@ -431,31 +492,40 @@ VOID TitleProc(VOID)
 /// </summary>
 VOID TitleDraw(VOID)
 {
-	//’e‚Ì•`‰æ
-	DrawGraph(0, 0, Tama[TamaIndex], TRUE);
+
+	DrawTama(&tama[0]);			//’e‚ğ•`‰æ
 
 	DrawString(0, 0, "ƒ^ƒCƒgƒ‹‰æ–Ê", GetColor(0, 0, 0));
 
-	if (TamaChangeCnt < TamaChangeCntMax)
+	return;
+}
+/// <summary>
+/// ’e‚Ì•`‰æ
+/// </summary>
+/// <param name="tama">’e‚Ì\‘¢‘Ì</param>
+VOID DrawTama(TAMA* tama)
+{
+	//’e‚Ì•`‰æ
+	DrawGraph(tama->x, tama->y, tama->handle[tama->NowIndex], TRUE);
+
+	if (tama->AnimeCnt< tama->AnimeCntMAX)
 	{
-		TamaChangeCnt++;
+		tama->AnimeCnt++;
 	}
 	else
 	{
 		//’e‚Ì“Yš‚ª’e‚Ì•ªŠ„”‚ÌÅ‘å‚æ‚è‚à‰º‚Ì‚Æ‚«
-		if (TamaIndex < TAMA_DIV_MAX -1)
+		if (tama->NowIndex < TAMA_DIV_MAX - 1)
 		{
-			TamaIndex++;		//Ÿ‚Ì‰æ‘œ‚Ö
+			tama->NowIndex++;		//Ÿ‚Ì‰æ‘œ‚Ö
 		}
 		else
 		{
-			TamaIndex = 0;		//Å‰‚É–ß‚·
+			tama->NowIndex = 0;		//Å‰‚É–ß‚·
 		}
 
-		TamaChangeCnt = 0;
+		tama->AnimeCnt = 0;
 	}
-
-	return;
 }
 
 /// <summary>
@@ -673,6 +743,21 @@ VOID CollUpdate(CHARACTOR* chara)
 }
 
 /// <summary>
+/// “–‚½‚è”»’è‚Ì—ÌˆæXV
+/// </summary>
+/// <param name="chara">“–‚½‚è”»’è‚Ì—Ìˆæ</param>
+VOID CollUpdateTama(TAMA* tama)
+{
+	tama->coll.left = tama->x;
+	tama->coll.top = tama->y;
+
+	tama->coll.right = tama->x + tama->width;
+	tama->coll.bottom = tama->y + tama->height;
+
+	return;
+}
+
+/// <summary>
 /// ‹éŒ`‚Æ‹éŒ`‚Ì“–‚½‚è”»’è
 /// </summary>
 /// <param name="a">‹éŒ`A</param>
@@ -696,3 +781,4 @@ BOOL OnCollRect(RECT a, RECT b)
 		return FALSE;
 	}
 }
+
