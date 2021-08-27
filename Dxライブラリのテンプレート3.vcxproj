@@ -155,6 +155,8 @@
     <ClCompile Include="FPS.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mouse.cpp" />
+    <ClCompile Include="shape.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="game.ico" />
@@ -163,7 +165,9 @@
     <ClInclude Include="FPS.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="keyboard.h" />
+    <ClInclude Include="mouse.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="shape.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
