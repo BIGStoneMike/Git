@@ -780,7 +780,28 @@ VOID Play(VOID)
 /// </summary>
 VOID PlayProc(VOID)
 {
+	/*
+	//エンターを押したらエンド画面
 	if (KeyClick(KEY_INPUT_RETURN) == TRUE)
+	{
+		//BGMを止める
+		StopSoundMem(PlayBGM.handle);
+
+		//シーン切り替え
+		//次のシーンの初期化をここで行うと楽
+
+		//ゲームの初期化
+		GameInit();
+
+		//クリア画面に切り替え
+		ChangeScene(GAME_SCENE_END);
+
+		return;
+	}
+	*/
+
+	//スコアが既定の数値に到達したらエンド画面
+	if (Score == 2500)
 	{
 		//BGMを止める
 		StopSoundMem(PlayBGM.handle);
@@ -1069,9 +1090,6 @@ VOID PlayProc(VOID)
 		}
 	}
 
-	//とりあえずスコア加算
-	Score++;
-
 	return;
 }
 
@@ -1185,7 +1203,7 @@ VOID PlayDraw(VOID)
 	int old = GetFontSize();				//以前のフォントのサイズを取得
 	SetFontSize(40);						//フォントを大きくする
 	DrawFormatString(0, 100, GetColor(255, 255, 255), "SCORE:%05d", Score);
-	SetFontSize(10);						//フォントをもとに戻す
+	SetFontSize(old);						//フォントをもとに戻す
 
 	//マウスの位置を描画
 	MouseDraw();
